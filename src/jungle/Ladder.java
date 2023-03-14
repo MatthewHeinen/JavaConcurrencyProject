@@ -24,7 +24,7 @@ public class Ladder {
 		return rungCapacity.length;
 	}
 	// return True if you succeed in grabbing the rung
-	public boolean grabRung(int which) {
+	public synchronized boolean grabRung(int which) {
 		if (rungCapacity[which] < 1) {
 			return false;
 		} else {
@@ -32,7 +32,7 @@ public class Ladder {
 			return true;
 		}
 	}
-	public void releaseRung(int which) {
+	public synchronized void releaseRung(int which) {
 		rungCapacity[which]++;
 	}
 }
