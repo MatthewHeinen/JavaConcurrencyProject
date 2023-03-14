@@ -8,7 +8,7 @@ package src.jungle;
  *
  * The Ladder class is NOT a kind of thread,
  *  since it doesn't actually do anything except get used by Apes.
- * The ladder just keeps track of how many apes are on each rung.
+ * The ladder just keeps track of how many apes are on each rung (always 0 or 1).
  */
 
 public class Ladder {
