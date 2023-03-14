@@ -60,6 +60,9 @@ public class Jungle {
 			if (nRemaining > 0)
 				nRemaining--;
 		}
+
+		// Could do a bunch of "join"'s here, if we had recorded all those threads;
+		// Java.util.concurrent has things like fork-join thread pools that help do this nicely
 	}
 
 	private static final Random dice = new Random(); // random number generator, for delays mostly
