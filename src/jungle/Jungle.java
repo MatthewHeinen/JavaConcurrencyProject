@@ -25,7 +25,7 @@ public class Jungle {
 		//    add spurious "tryToSleep"'s *anywhere* to mess it up.
 		//
 		int    eastBound = 4; // how many apes going East? use -1 for infinity
-		int    westBound = 2; // how many apes going West? use -1 for infinity
+		int    westBound = 4; // how many apes going West? use -1 for infinity
 		double apeMin = 4.0;  // how long to wait between consecutive apes going one way
 		double apeVar = 1.0;  //  4 seconds is usually enough, but vary a bit to see what happens
 		double sideMin = 5.0; // how long to wait before coming back across
@@ -33,33 +33,46 @@ public class Jungle {
 		
 		// create a Ladder
 		Ladder l = new Ladder(4);
-		
-		// create some Eastbound apes who want that ladder
-		int nRemaining = eastBound;
-		int apeCounter = 1;
-		while (nRemaining != 0) {
-			Ape a = new Ape("E-"+apeCounter, l,true);
-			a.start();
-			apeCounter++;
-			tryToSleep(apeMin, apeVar);
-			if (nRemaining > 0)
-				nRemaining--;
-		}
+
+
+		Thread east = new Thread(new Runnable() {
+			public void run(){
+				// create some Eastbound apes who want that ladder
+				int nRemaining = eastBound;
+				int apeCounter = 1;
+				while (nRemaining != 0) {
+					Ape a = new Ape("E-"+apeCounter, l,true);
+					a.start();
+					apeCounter++;
+					tryToSleep(apeMin, apeVar);
+					if (nRemaining > 0)
+						nRemaining--;
+				}
+			}
+		});
+		east.start();
+
 
 		// put this in to create a pause that will avoid the problem BUT OF COURSE THIS IS NOT A SOLUTION TO THE LAB!
 		tryToSleep(sideMin, sideVar);
-		
-		// and create some Westbound apes who want the SAME ladder
-		nRemaining = westBound;
-		apeCounter=1;
-		while (nRemaining != 0) {
-			Ape a = new Ape("W-"+apeCounter, l,false);
-			a.start();
-			apeCounter++;
-			tryToSleep(apeMin, apeVar);
-			if (nRemaining > 0)
-				nRemaining--;
-		}
+
+		Thread west = new Thread(new Runnable() {
+			public void run() {
+				// and create some Westbound apes who want the SAME ladder
+				int nRemaining = westBound;
+				int apeCounter=1;
+				while (nRemaining != 0) {
+					Ape a = new Ape("W-"+apeCounter, l,false);
+					a.start();
+					apeCounter++;
+					tryToSleep(apeMin, apeVar);
+					if (nRemaining > 0)
+						nRemaining--;
+				}
+			}
+		});
+		west.start();
+
 
 //		 Could do a bunch of "join"'s here, if we had recorded all those threads;
 //		 Java.util.concurrent has things like fork-join thread pools that help do this nicely
