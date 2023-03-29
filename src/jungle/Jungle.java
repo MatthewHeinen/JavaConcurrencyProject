@@ -39,9 +39,7 @@ public class Jungle {
 		int apeCounter = 1;
 		while (nRemaining != 0) {
 			Ape a = new Ape("E-"+apeCounter, l,true);
-			Ape b = new Ape("W-"+apeCounter, l,false);
 			a.start();
-			b.start();
 			apeCounter++;
 			tryToSleep(apeMin, apeVar);
 			if (nRemaining > 0)
@@ -52,19 +50,19 @@ public class Jungle {
 		tryToSleep(sideMin, sideVar);
 		
 		// and create some Westbound apes who want the SAME ladder
-//		nRemaining = westBound;
-//		apeCounter=1;
-//		while (nRemaining != 0) {
-//			Ape a = new Ape("W-"+apeCounter, l,false);
-//			a.start();
-//			apeCounter++;
-//			tryToSleep(apeMin, apeVar);
-//			if (nRemaining > 0)
-//				nRemaining--;
-//		}
+		nRemaining = westBound;
+		apeCounter=1;
+		while (nRemaining != 0) {
+			Ape a = new Ape("W-"+apeCounter, l,false);
+			a.start();
+			apeCounter++;
+			tryToSleep(apeMin, apeVar);
+			if (nRemaining > 0)
+				nRemaining--;
+		}
 
-		// Could do a bunch of "join"'s here, if we had recorded all those threads;
-		// Java.util.concurrent has things like fork-join thread pools that help do this nicely
+//		 Could do a bunch of "join"'s here, if we had recorded all those threads;
+//		 Java.util.concurrent has things like fork-join thread pools that help do this nicely
 	}
 
 	private static final Random dice = new Random(); // random number generator, for delays mostly
