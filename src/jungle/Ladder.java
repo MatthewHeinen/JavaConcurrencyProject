@@ -3,6 +3,8 @@
  */
 package src.jungle;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * @author davew
  *
@@ -24,15 +26,19 @@ public class Ladder {
 		return rungCapacity.length;
 	}
 	// return True if you succeed in grabbing the rung
-	public synchronized boolean grabRung(int which) {
+	Semaphore sem = new Semaphore(1);
+	public synchronized boolean grabRung(int which) throws InterruptedException {
 		if (rungCapacity[which] < 1) {
+			sem.acquire(which);
 			return false;
 		} else {
+			sem.acquire(which);
 			rungCapacity[which]--;
 			return true;
 		}
 	}
 	public synchronized void releaseRung(int which) {
 		rungCapacity[which]++;
+		sem.release(which);
 	}
 }

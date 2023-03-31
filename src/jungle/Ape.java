@@ -39,23 +39,31 @@ public class Ape extends Thread {
 		}
 		
 		if (debug)
-			System.out.println("Ape " + _name + " wants rung " + startRung);			
-		if (!_ladderToCross.grabRung(startRung)) {
-			System.out.println("Ape " + _name + ": AAaaaaaah! " + " I can't get rung " + startRung + ", I'm falling off the ladder :-(");
-			System.out.println("  Ape " + _name + " and has been eaten by the crocodiles!");
-			return;  // died
+			System.out.println("Ape " + _name + " wants rung " + startRung);
+		try {
+			if (!_ladderToCross.grabRung(startRung)) {
+				System.out.println("Ape " + _name + ": AAaaaaaah! " + " I can't get rung " + startRung + ", I'm falling off the ladder :-(");
+				System.out.println("  Ape " + _name + " and has been eaten by the crocodiles!");
+				return;  // died
+			}
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
 		}
 		if (debug)
 			System.out.println("Ape " + _name + "  got  rung " + startRung);			
 		for (int i = startRung+move; i!=endRung+move; i+=move) {
 			Jungle.tryToSleep(rungDelayMin, rungDelayVar);
 			if (debug)
-				System.out.println("Ape " + _name + " wants rung " + i);			
-			if (!_ladderToCross.grabRung(i)) {
-				System.out.println("Ape " + _name + ": AAaaaaaah! I can't get rung " + i + ", I'm falling off the ladder :-(");
-				System.out.println("  Ape " + _name + " has been eaten by the crocodiles!");
-				_ladderToCross.releaseRung(i-move); /// so far, we have no way to wait, so release the old lock as we die :-(
-				return;  //  died
+				System.out.println("Ape " + _name + " wants rung " + i);
+			try {
+				if (!_ladderToCross.grabRung(i)) {
+					System.out.println("Ape " + _name + ": AAaaaaaah! I can't get rung " + i + ", I'm falling off the ladder :-(");
+					System.out.println("  Ape " + _name + " has been eaten by the crocodiles!");
+					_ladderToCross.releaseRung(i-move); /// so far, we have no way to wait, so release the old lock as we die :-(
+					return;  //  died
+				}
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
 			}
 			if (debug)
 				System.out.println("Ape " + _name + "  got  " + i + " releasing " + (i-move));			
