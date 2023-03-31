@@ -3,6 +3,7 @@
  */
 package src.jungle;
 
+import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -27,9 +28,10 @@ public class Ladder {
 	}
 	// return True if you succeed in grabbing the rung
 	Semaphore sem = new Semaphore(1);
+	ArrayList<Semaphore> semList = new ArrayList<>();
+
 	public synchronized boolean grabRung(int which) throws InterruptedException {
 		if (rungCapacity[which] < 1) {
-			sem.acquire(which);
 			return false;
 		} else {
 			sem.acquire(which);
