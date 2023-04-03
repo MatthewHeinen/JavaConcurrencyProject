@@ -24,8 +24,8 @@ public class Jungle {
 		//    timing configuration should work, and there should be no way to
 		//    add spurious "tryToSleep"'s *anywhere* to mess it up.
 		//
-		int    eastBound = 4; // how many apes going East? use -1 for infinity
-		int    westBound = 4; // how many apes going West? use -1 for infinity
+		int    eastBound = 5; // how many apes going East? use -1 for infinity
+		int    westBound = 5; // how many apes going West? use -1 for infinity
 		double apeMin = 4.0;  // how long to wait between consecutive apes going one way
 		double apeVar = 1.0;  //  4 seconds is usually enough, but vary a bit to see what happens
 		double sideMin = 5.0; // how long to wait before coming back across

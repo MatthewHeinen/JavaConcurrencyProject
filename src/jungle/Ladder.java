@@ -16,31 +16,38 @@ import java.util.concurrent.Semaphore;
 
 public class Ladder {
 	private final int[] rungCapacity;
+	private final Semaphore[] sem;
 	
 	public Ladder(int _nRungs) {
 		rungCapacity = new int[_nRungs];
+		sem = new Semaphore[_nRungs];
 		// capacity 1 available on each rung
-		for (int i=0; i<_nRungs; i++)
+		for (int i=0; i<_nRungs; i++) {
 			rungCapacity[i] = 1;
+			sem[i] = new Semaphore(1);
+
+		}
+
+
 	}
 	public int nRungs() {
 		return rungCapacity.length;
 	}
 	// return True if you succeed in grabbing the rung
-	Semaphore sem = new Semaphore(1);
-	ArrayList<Semaphore> semList = new ArrayList<>();
+//	Semaphore sem = new Semaphore(1);
+//	ArrayList<Semaphore> semList = new ArrayList<>();
 
 	public synchronized boolean grabRung(int which) throws InterruptedException {
-		if (rungCapacity[which] < 1) {
-			return false;
-		} else {
-			sem.acquire(which);
+//		if (rungCapacity[which] < 1) {
+//			return false;
+
+			sem[which].acquire();
 			rungCapacity[which]--;
 			return true;
-		}
+
 	}
 	public synchronized void releaseRung(int which) {
+		sem[which].release();
 		rungCapacity[which]++;
-		sem.release(which);
 	}
 }
