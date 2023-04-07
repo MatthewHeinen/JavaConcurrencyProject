@@ -3,6 +3,8 @@
  */
 package src.jungle;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * @author davew
  *
@@ -18,7 +20,7 @@ public class Ape extends Thread {
 	private final String _name;
 	private final Ladder _ladderToCross;
 	private final boolean _goingEast; // if false, going west
-	
+
 	public Ape(String name, Ladder toCross, boolean goingEast) {
 		_name = name;
 		_ladderToCross = toCross;

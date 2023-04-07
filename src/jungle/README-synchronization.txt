@@ -1,4 +1,4 @@
-Description of what I will do:
+Description of what I will do for part 2:
 In order to properly synchronize the grab and release rung methods, I will use semaphores in order to accomplish this task.
 I will use semaphores in a way so that each rung will have a semaphore. This will allow each rung to have an acquire and release
 method for each rung. Due to this, once one of the rungs has an ape on it, it will not allow another ape to try and go onto this rung.
@@ -101,5 +101,7 @@ Ape W-4 starting to go West.
 Ape W-4 wants rung 3
 Ape W-5 starting to go West.
 Ape W-5 wants rung 3
+
+Description of what I will do for part 3:
 
 
