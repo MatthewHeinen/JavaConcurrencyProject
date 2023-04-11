@@ -6,6 +6,7 @@ package src.jungle;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * @author davew
@@ -18,16 +19,17 @@ import java.util.Timer;
 public class Ladder {
 	private final int[] rungCapacity;
 	private final Semaphore[] sem;
-	private final Semaphore[] eastBuffer;
-	private final Semaphore[] westBuffer;
+	private final Semaphore eastBuffer;
+	private final Semaphore westBuffer;
 	private boolean ladderOccupied = true;
-	private boolean direction = true;
+	private boolean directionIsEast = true;
+
 
 	public Ladder(int _nRungs) {
 		rungCapacity = new int[_nRungs];
 		sem = new Semaphore[_nRungs];
-		eastBuffer = new Semaphore[1000];
-		westBuffer = new Semaphore[1000];
+		eastBuffer = new Semaphore(1);
+		westBuffer = new Semaphore(1);
 		// capacity 1 available on each rung
 		for (int i=0; i<_nRungs; i++) {
 			rungCapacity[i] = 1;
@@ -42,11 +44,11 @@ public class Ladder {
 	// return True if you succeed in grabbing the rung
 
 
-	public boolean grabRung(int which) throws InterruptedException { //i just realized, should i not have the sync keyword here? It seems like It's still working though?
+	public boolean grabRung(int which) throws InterruptedException {
 //		if (rungCapacity[which] < 1) {
 //			return false;
 			changeSides(which);
-			sem[which].acquire(); //i need advice on how to do the next part. Should we just put more logic into the semaphores such as more/different aquires+releases, using the wait + notify, or is something else needed such as the sync keyword
+			sem[which].acquire();
 			rungCapacity[which]--;
 			return true;
 
@@ -58,7 +60,8 @@ public class Ladder {
 
 	public void changeSides(int which) throws InterruptedException {
 		//if direction is goingEast and timer hits zero, set goingEast to false so that its west turn
-		if(direction){
+		timing();
+		if(directionIsEast){
 			eastGoes(which);
 		} else {
 			westGoes(which);
@@ -66,7 +69,7 @@ public class Ladder {
 	}
 
 	public void eastGoes(int which) throws InterruptedException {
-		westBuffer[which].acquire();
+		westBuffer.acquire();
 		//add logic to make sure none of the rungs have apes on them
 		while (ladderOccupied) {
 			for (int i = 0; i < rungCapacity.length; i++) {
@@ -77,14 +80,12 @@ public class Ladder {
 				}
 			}
 		}
-		eastBuffer[which].release();
+		eastBuffer.release();
 	}
-
-
 
 
 	public void westGoes(int which) throws InterruptedException {
-		eastBuffer[which].acquire();
+		eastBuffer.acquire();
 		//add logic to make sure none of the rungs have apes on them
 		while (ladderOccupied) {
 			for (int i = 0; i < rungCapacity.length; i++) {
@@ -95,6 +96,30 @@ public class Ladder {
 				}
 			}
 		}
-		westBuffer[which].release();
+		westBuffer.release();
 	}
+
+
+	public void timing() {
+
+		Timer timer = new Timer();
+		TimerTask task = new TimerTask() {
+			@Override
+			public void run() {
+				//System.out.println("Timer is working");
+				int count = 0;
+				if(count % 2 == 0) {
+					directionIsEast = true;
+					count = count + 1;
+				} else {
+					directionIsEast = false;
+					count = count + 1;
+				}
+				count++;
+			}
+		};
+		timer.schedule(task, 30, 40);
+
+	}
+
 }
