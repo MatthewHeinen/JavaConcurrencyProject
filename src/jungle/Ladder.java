@@ -23,6 +23,7 @@ public class Ladder {
 	private final Semaphore westBuffer;
 	private boolean ladderOccupied = true;
 	private boolean directionIsEast = true;
+	public int count = 0;
 
 
 	public Ladder(int _nRungs) {
@@ -60,7 +61,7 @@ public class Ladder {
 
 	public void changeSides(int which) throws InterruptedException {
 		//if direction is goingEast and timer hits zero, set goingEast to false so that its west turn
-		timing();
+		//timing();
 		if(directionIsEast){
 			eastGoes(which);
 		} else {
@@ -73,7 +74,7 @@ public class Ladder {
 		//add logic to make sure none of the rungs have apes on them
 		while (ladderOccupied) {
 			for (int i = 0; i < rungCapacity.length; i++) {
-				if (sem[which].tryAcquire()) {
+				if (sem[which].tryAcquire()) { //use acquire to keep the ape on one of the rungs to ensure we are not skipping time. Rewrite the logic here
 					ladderOccupied = false;
 				} else {
 					ladderOccupied = true;
@@ -107,13 +108,10 @@ public class Ladder {
 			@Override
 			public void run() {
 				//System.out.println("Timer is working");
-				int count = 0;
 				if(count % 2 == 0) {
 					directionIsEast = true;
-					count = count + 1;
 				} else {
 					directionIsEast = false;
-					count = count + 1;
 				}
 				count++;
 			}
