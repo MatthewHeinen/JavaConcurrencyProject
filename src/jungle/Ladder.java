@@ -4,6 +4,7 @@
 package src.jungle;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,6 +25,7 @@ public class Ladder {
 	private boolean ladderOccupied = true;
 	private boolean directionIsEast = true;
 	public int count = 0;
+	ArrayList<Integer> list1 = new ArrayList<>(Arrays.asList(1, 1, 1, 1));
 
 
 	public Ladder(int _nRungs) {
@@ -31,6 +33,7 @@ public class Ladder {
 		sem = new Semaphore[_nRungs];
 		eastBuffer = new Semaphore(1);
 		westBuffer = new Semaphore(1);
+		timing(); //is this where the timer should go?
 		// capacity 1 available on each rung
 		for (int i=0; i<_nRungs; i++) {
 			rungCapacity[i] = 1;
@@ -69,18 +72,16 @@ public class Ladder {
 		}
 	}
 
+
 	public void eastGoes(int which) throws InterruptedException {
 		westBuffer.acquire();
 		//add logic to make sure none of the rungs have apes on them
-		while (ladderOccupied) {
-			for (int i = 0; i < rungCapacity.length; i++) {
-				if (sem[which].tryAcquire()) { //use acquire to keep the ape on one of the rungs to ensure we are not skipping time. Rewrite the logic here
-					ladderOccupied = false;
-				} else {
-					ladderOccupied = true;
-				}
-			}
+
+		for (int i = 0; i < rungCapacity.length; i++) {
+			sem[which].acquire();
+			sem[which].release();
 		}
+
 		eastBuffer.release();
 	}
 
@@ -88,15 +89,11 @@ public class Ladder {
 	public void westGoes(int which) throws InterruptedException {
 		eastBuffer.acquire();
 		//add logic to make sure none of the rungs have apes on them
-		while (ladderOccupied) {
-			for (int i = 0; i < rungCapacity.length; i++) {
-				if (sem[which].tryAcquire()) {
-					ladderOccupied = false;
-				} else {
-					ladderOccupied = true;
-				}
-			}
+		for (int i = 0; i < rungCapacity.length; i++) {
+			sem[which].acquire();
+			sem[which].release();
 		}
+
 		westBuffer.release();
 	}
 
