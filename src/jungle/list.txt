@@ -1,0 +1,8 @@
+Steps of the algorithm:
+1) We first  have the eastbound apes go until the timer goes off
+2) When the timer goes off, we go to our westGoes method, where we will acquire the east buffer, make sure there are no apes on the rungs and then relsease the westbound apes
+3) This keeps going until there is no more apes wanting to cross.
+
+
+My questions: How do I know if my east buffer and west buffer are working/how do I know they are in their intended location
+Why is only the first ape going getting the first rung, and then it is deadlocking

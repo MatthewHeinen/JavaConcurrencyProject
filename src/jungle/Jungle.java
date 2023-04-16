@@ -33,7 +33,7 @@ public class Jungle {
 		
 		// create a Ladder
 		Ladder l = new Ladder(4);
-
+		l.timing();
 
 		Thread east = new Thread(new Runnable() {
 			public void run(){
