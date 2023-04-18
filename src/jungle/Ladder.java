@@ -22,7 +22,6 @@ public class Ladder {
 	private final Semaphore[] sem;
 	private final Semaphore eastBuffer;
 	private final Semaphore westBuffer;
-	private boolean ladderOccupied = true;
 	private boolean directionIsEast = true;
 
 
@@ -49,13 +48,13 @@ public class Ladder {
 //		if (rungCapacity[which] < 1) {
 //			return false;
 			if((which == 0) && directionIsEast){
-				synchronized (eastBuffer) {
-					eastBuffer.wait();
+				synchronized (westBuffer) {
+					westBuffer.acquire();
 				}
 			}
 			if((which == rungCapacity.length-1) && !directionIsEast){
-				synchronized (westBuffer){
-					westBuffer.wait();
+				synchronized (eastBuffer){
+					eastBuffer.acquire();
 				}
 			}
 			//changeSides();
@@ -72,58 +71,32 @@ public class Ladder {
 	public void changeSides() throws InterruptedException {
 		//if direction is goingEast and timer hits zero, set goingEast to false so that its west turn
 		if(directionIsEast){
-			//westBuffer.acquire();
+			westBuffer.acquire();
 			//add logic to make sure none of the rungs have apes on them
 
 			for (int i = 0; i < rungCapacity.length; i++) {
 				sem[i].acquire();
-				System.out.println("got here, acquired " +i);
+				System.out.println("East got here, acquired " +i);
 				sem[i].release();
-				System.out.println("got here, released " +i);
-				System.out.println("*************");
+				System.out.println("East got here, released " +i);
+				//System.out.println("*************");
 			}
 
-			System.out.println("??????????????????");
+			System.out.println("here");
 			eastBuffer.release();
-		} else {
-			//eastBuffer.acquire();
+		} if(!directionIsEast) {
+			eastBuffer.acquire();
 			for (int i = 0; i < rungCapacity.length; i++) {
 				sem[i].acquire();
+				System.out.println("West got here, acquired " +i);
 				sem[i].release();
+				System.out.println("West got here, released " +i);
 			}
-
+			System.out.println("testing");
 			westBuffer.release();
 		}
 	}
 
-
-//	public void eastGoes(int which) throws InterruptedException {
-//		westBuffer.acquire();
-//		//add logic to make sure none of the rungs have apes on them
-//
-//		for (int i = 0; i < rungCapacity.length; i++) {
-//			sem[which].acquire();
-//			System.out.println("got here, acquireed " +i);
-//			sem[which].release();
-//			System.out.println("got here, released " +i);
-//			System.out.println("*************");
-//		}
-//
-//		System.out.println("??????????????????");
-//		eastBuffer.release();
-//	}
-//
-//
-//	public void westGoes(int which) throws InterruptedException {
-//		eastBuffer.acquire();
-//		//add logic to make sure none of the rungs have apes on them
-//		for (int i = 0; i < rungCapacity.length; i++) {
-//			sem[which].acquire();
-//			sem[which].release();
-//		}
-//
-//		westBuffer.release();
-//	}
 
 
 	public void timing() {
@@ -133,14 +106,13 @@ public class Ladder {
 			@Override
 			public void run() {
 				//System.out.println("Timer is working");
-//				if(count % 2 == 0) {
-//					directionIsEast = true;
-//				} else {
-//					directionIsEast = false;
-//				}
-//				count++;
 				try {
 					changeSides();
+//					if(directionIsEast) {
+//						directionIsEast = false;
+//					} else {
+//						directionIsEast = true;
+//					}
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}
