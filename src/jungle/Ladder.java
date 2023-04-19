@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author davew
@@ -71,7 +72,7 @@ public class Ladder {
 	public void changeSides() throws InterruptedException {
 		//if direction is goingEast and timer hits zero, set goingEast to false so that its west turn
 		if(directionIsEast){
-			westBuffer.acquire();
+			//westBuffer.acquire();
 			//add logic to make sure none of the rungs have apes on them
 
 			for (int i = 0; i < rungCapacity.length; i++) {
@@ -85,8 +86,8 @@ public class Ladder {
 			System.out.println("here");
 			eastBuffer.release();
 		} if(!directionIsEast) {
-			eastBuffer.acquire();
-			for (int i = 0; i < rungCapacity.length; i++) {
+			//eastBuffer.acquire();
+			for (int i = rungCapacity.length-1; i >= 0; i--) {
 				sem[i].acquire();
 				System.out.println("West got here, acquired " +i);
 				sem[i].release();
@@ -105,14 +106,15 @@ public class Ladder {
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
-				//System.out.println("Timer is working");
+				System.out.println("Timer is working");
 				try {
+					System.out.println("**************");
 					changeSides();
-//					if(directionIsEast) {
-//						directionIsEast = false;
-//					} else {
-//						directionIsEast = true;
-//					}
+					if(directionIsEast) {
+						directionIsEast = false;
+					} else {
+						directionIsEast = true;
+					}
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}
