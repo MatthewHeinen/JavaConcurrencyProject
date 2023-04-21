@@ -23,14 +23,16 @@ public class Ladder {
 	private final Semaphore[] sem;
 	private final Semaphore eastBuffer;
 	private final Semaphore westBuffer;
+	private final Semaphore apeChecker;
 	private boolean directionIsEast = true;
 
 
 	public Ladder(int _nRungs) {
 		rungCapacity = new int[_nRungs];
 		sem = new Semaphore[_nRungs];
-		eastBuffer = new Semaphore(1);
-		westBuffer = new Semaphore(1);
+		eastBuffer = new Semaphore(3);
+		westBuffer = new Semaphore(3);
+		apeChecker = new Semaphore(1);
 		// capacity 1 available on each rung
 		for (int i=0; i<_nRungs; i++) {
 			rungCapacity[i] = 1;
@@ -51,11 +53,13 @@ public class Ladder {
 			if((which == 0) && directionIsEast){
 				synchronized (westBuffer) {
 					westBuffer.acquire();
+					apeChecker.acquire();
 				}
 			}
 			if((which == rungCapacity.length-1) && !directionIsEast){
 				synchronized (eastBuffer){
 					eastBuffer.acquire();
+					apeChecker.acquire();
 				}
 			}
 			//changeSides();
@@ -72,6 +76,10 @@ public class Ladder {
 	public void changeSides() throws InterruptedException {
 		//if direction is goingEast and timer hits zero, set goingEast to false so that its west turn
 		if(directionIsEast){
+			if (Ape.count == 0) {
+				apeChecker.release();
+			}
+			System.out.println("Going East");
 			//westBuffer.acquire();
 			//add logic to make sure none of the rungs have apes on them
 
@@ -86,7 +94,11 @@ public class Ladder {
 			System.out.println("here");
 			eastBuffer.release();
 		} if(!directionIsEast) {
+			if (Ape.count == 0) {
+				apeChecker.release();
+			}
 			//eastBuffer.acquire();
+			System.out.println("Going West");
 			for (int i = rungCapacity.length-1; i >= 0; i--) {
 				sem[i].acquire();
 				System.out.println("West got here, acquired " +i);
@@ -106,9 +118,9 @@ public class Ladder {
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
-				System.out.println("Timer is working");
+				//System.out.println("Timer is working");
 				try {
-					System.out.println("**************");
+					//System.out.println("**************");
 					changeSides();
 					if(directionIsEast) {
 						directionIsEast = false;
