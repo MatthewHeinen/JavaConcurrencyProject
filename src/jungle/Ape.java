@@ -20,7 +20,6 @@ public class Ape extends Thread {
 	private final String _name;
 	private final Ladder _ladderToCross;
 	private final boolean _goingEast; // if false, going west
-	public static int count = 0;   //should i have a counter to find the last ape that wants rung 0. with this, i can then wait until the counter is 0 to flip direction
 
 	public Ape(String name, Ladder toCross, boolean goingEast) {
 		_name = name;
@@ -44,7 +43,6 @@ public class Ape extends Thread {
 		if (debug) {
 			System.out.println("Ape " + _name + " wants rung " + startRung);
 		}
-		count += 1;
 		try {
 			if (!_ladderToCross.grabRung(startRung)) {
 				System.out.println("Ape " + _name + ": AAaaaaaah! " + " I can't get rung " + startRung + ", I'm falling off the ladder :-(");
@@ -57,14 +55,12 @@ public class Ape extends Thread {
 		if (debug) {
 			System.out.println("Ape " + _name + "  got  rung " + startRung);
 		}
-		count -= 1;
 		for (int i = startRung+move; i!=endRung+move; i+=move) {
 			Jungle.tryToSleep(rungDelayMin, rungDelayVar);
 			if (debug){
-
-			}
-				count += 1;
 				System.out.println("Ape " + _name + " wants rung " + i);
+			}
+
 			try {
 				if (!_ladderToCross.grabRung(i)) {
 					System.out.println("Ape " + _name + ": AAaaaaaah! I can't get rung " + i + ", I'm falling off the ladder :-(");

@@ -3,12 +3,9 @@
  */
 package src.jungle;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.Semaphore;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author davew
@@ -23,16 +20,23 @@ public class Ladder {
 	private final Semaphore[] sem;
 	private final Semaphore eastBuffer;
 	private final Semaphore westBuffer;
-	private final Semaphore apeChecker;
-	private boolean directionIsEast = true;
+//	private AtomicInteger numOfThreadsGoingEast = new AtomicInteger(0);
+//	private AtomicInteger numOfThreadsGoingWest = new AtomicInteger(0);
+//	private AtomicInteger matchingCounterEast = new AtomicInteger(0);
+//	private AtomicInteger matchingCounterWest = new AtomicInteger(0);
+
+	private int numThreadsEast = 0;
+	private int numThreadsWest = 0;
+	private int matchCountEast = 0;
+	private int matchCountWest = 0;
+	private boolean ladderDirectionIsEast = true;
 
 
 	public Ladder(int _nRungs) {
 		rungCapacity = new int[_nRungs];
 		sem = new Semaphore[_nRungs];
-		eastBuffer = new Semaphore(3);
-		westBuffer = new Semaphore(3);
-		apeChecker = new Semaphore(1);
+		eastBuffer = new Semaphore(1);
+		westBuffer = new Semaphore(1);
 		// capacity 1 available on each rung
 		for (int i=0; i<_nRungs; i++) {
 			rungCapacity[i] = 1;
@@ -50,20 +54,39 @@ public class Ladder {
 	public boolean grabRung(int which) throws InterruptedException {
 //		if (rungCapacity[which] < 1) {
 //			return false;
-			if((which == 0) && directionIsEast){
-				synchronized (westBuffer) {
+			if((which == 0) && ladderDirectionIsEast){
+				synchronized (eastBuffer) {
+					synchronized (this){
+						numThreadsEast++;
+					}
 					westBuffer.acquire();
-					apeChecker.acquire();
 				}
 			}
-			if((which == rungCapacity.length-1) && !directionIsEast){
-				synchronized (eastBuffer){
+			if((which == rungCapacity.length-1) && !ladderDirectionIsEast){
+				synchronized (westBuffer){
+					synchronized (this){
+						numThreadsWest++;
+					}
 					eastBuffer.acquire();
-					apeChecker.acquire();
 				}
 			}
 			//changeSides();
 			sem[which].acquire();
+
+			if((which == 0 && ladderDirectionIsEast)){
+				synchronized (eastBuffer){
+					synchronized (this){
+						matchCountEast++;
+					}
+				}
+			} else if((which == rungCapacity.length-1) && !ladderDirectionIsEast){
+				synchronized (westBuffer){
+					synchronized (this){
+						matchCountWest++;
+
+					}
+				}
+			}
 			rungCapacity[which]--;
 			return true;
 
@@ -73,41 +96,49 @@ public class Ladder {
 		rungCapacity[which]++;
 	}
 
-	public void changeSides() throws InterruptedException {
+	private  synchronized void  changeSides() throws InterruptedException { // called whe sybchrinize on
 		//if direction is goingEast and timer hits zero, set goingEast to false so that its west turn
-		if(directionIsEast){
-			if (Ape.count == 0) {
-				apeChecker.release();
-			}
-			System.out.println("Going East");
-			//westBuffer.acquire();
-			//add logic to make sure none of the rungs have apes on them
+		if(ladderDirectionIsEast){
+			if(numThreadsEast ==  matchCountEast){ //ToDo:: Lock this and use .get()
+				System.out.println("Going East, numThreadsEast == " + numThreadsEast + ", matchCountEast ==" +matchCountEast);
+				//westBuffer.acquire();
+				//add logic to make sure none of the rungs have apes on them
 
-			for (int i = 0; i < rungCapacity.length; i++) {
-				sem[i].acquire();
-				System.out.println("East got here, acquired " +i);
-				sem[i].release();
-				System.out.println("East got here, released " +i);
-				//System.out.println("*************");
+				for (int i = 0; i < rungCapacity.length; i++) {
+					sem[i].acquire();
+					System.out.println("East got here, acquired " +i);
+					sem[i].release();
+					System.out.println("East got here, released " +i);
+					//System.out.println("*************");
+				}
+
+				System.out.println("here in Going East, numThreadsEast == " + numThreadsEast + ", matchCountEast ==" +matchCountEast);
+
+				eastBuffer.release(4);
+			} else {
+				//System.out.println("Can't switch the ladder yet!");
+				return;
 			}
 
-			System.out.println("here");
-			eastBuffer.release();
-		} if(!directionIsEast) {
-			if (Ape.count == 0) {
-				apeChecker.release();
-			}
+		} if(!ladderDirectionIsEast) {
+				if(numThreadsWest == matchCountWest){
+					System.out.println("Going West");
+					for (int i = rungCapacity.length-1; i >= 0; i--) {
+						sem[i].acquire();
+						System.out.println("West got here, acquired " +i);
+						sem[i].release();
+						System.out.println("West got here, released " +i);
+					}
+					System.out.println("testing");
+					westBuffer.release(4);
+				} else {
+					//System.out.println("Can't switch the ladder");
+					return;
+				}
 			//eastBuffer.acquire();
-			System.out.println("Going West");
-			for (int i = rungCapacity.length-1; i >= 0; i--) {
-				sem[i].acquire();
-				System.out.println("West got here, acquired " +i);
-				sem[i].release();
-				System.out.println("West got here, released " +i);
-			}
-			System.out.println("testing");
-			westBuffer.release();
+
 		}
+		ladderDirectionIsEast = !ladderDirectionIsEast;
 	}
 
 
@@ -122,11 +153,6 @@ public class Ladder {
 				try {
 					//System.out.println("**************");
 					changeSides();
-					if(directionIsEast) {
-						directionIsEast = false;
-					} else {
-						directionIsEast = true;
-					}
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}
