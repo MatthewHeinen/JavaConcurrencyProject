@@ -44,7 +44,7 @@ public class Ape extends Thread {
 			System.out.println("Ape " + _name + " wants rung " + startRung);
 		}
 		try {
-			if (!_ladderToCross.grabRung(startRung)) {
+			if (!_ladderToCross.grabRung(startRung, _goingEast)) {
 				System.out.println("Ape " + _name + ": AAaaaaaah! " + " I can't get rung " + startRung + ", I'm falling off the ladder :-(");
 				System.out.println("  Ape " + _name + " and has been eaten by the crocodiles!");
 				return;  // died
@@ -62,7 +62,7 @@ public class Ape extends Thread {
 			}
 
 			try {
-				if (!_ladderToCross.grabRung(i)) {
+				if (!_ladderToCross.grabRung(i, _goingEast)) {
 					System.out.println("Ape " + _name + ": AAaaaaaah! I can't get rung " + i + ", I'm falling off the ladder :-(");
 					System.out.println("  Ape " + _name + " has been eaten by the crocodiles!");
 					_ladderToCross.releaseRung(i-move); /// so far, we have no way to wait, so release the old lock as we die :-(

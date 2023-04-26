@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Ladder {
     private final int[] rungCapacity;
     private final Semaphore[] sem;
-    private final Semaphore eastBuffer;
-    private final Semaphore westBuffer;
+    private final Object eastBuffer;
+    private final Object westBuffer;
 
     private int numThreadsEast = 0;
     private int numThreadsWest = 0;
@@ -42,45 +42,51 @@ public class Ladder {
 
     }
 
+    /**
+     * I believe it is working now. What I changed:
+     * made the semaphores objects so I could keep my counter logic like had it before and now use wait and notify
+     * made a new variable that tells either the eastbound apes or westbound apes to go. This corresponds with a variable in the ape class. Switched from using ladder direction to  check to the ape direction
+     * Added a while with a print statement that busy waits? So that we only allow apes to cross the bridge when the all the released apes at least have the firs ring
+     *
+     * Questions:
+     * Am i printing to many print statemnts bc of the while loop
+     * do these print statements affect the result?
+     * @return
+     */
+
     public int nRungs() {
         return rungCapacity.length;
     }
     // return True if you succeed in grabbing the rung
 
 
-    public boolean grabRung(int which) throws InterruptedException {
+    public boolean grabRung(int which, boolean apeGoingEast) throws InterruptedException {
 //		if (rungCapacity[which] < 1) {
 //			return false;
-        if ((which == 0) && ladderDirectionIsEast) {
+        if ((which == 0) && apeGoingEast) { //
             synchronized (eastBuffer) {
-                synchronized (this) {
-                    numThreadsEast++;
-                }
-                eastBuffer.acquire();
+                numThreadsEast++;
+                eastBuffer.wait();
             }
         }
-        if ((which == rungCapacity.length - 1) && !ladderDirectionIsEast) {
+        if ((which == rungCapacity.length - 1) && !apeGoingEast) {
             synchronized (westBuffer) {
-                synchronized (this) {
-                    numThreadsWest++;
-                }
-                westBuffer.acquire();
+                numThreadsWest++;
+                westBuffer.wait();
             }
         }
         //changeSides();
         sem[which].acquire();
 
-        if ((which == 0 && ladderDirectionIsEast)) {
+        if  (which == 0 && apeGoingEast) {
             synchronized (eastBuffer) {
-                synchronized (this) {
-                    matchCountEast++;
-                }
+                matchCountEast++;
             }
-        } else if ((which == rungCapacity.length - 1) && !ladderDirectionIsEast) {
-            synchronized (westBuffer) {
-                synchronized (this) {
+        }
+        else {
+            if ((which == rungCapacity.length - 1) && !apeGoingEast) {
+                synchronized (westBuffer) {
                     matchCountWest++;
-
                 }
             }
         }
@@ -94,7 +100,7 @@ public class Ladder {
         rungCapacity[which]++;
     }
 
-    private synchronized void changeSides() throws InterruptedException { // called whe synchronize on
+    private void changeSides() throws InterruptedException { // called whe synchronize on
         if (ladderDirectionIsEast) {
             for (int i = 0; i < rungCapacity.length; i++) {
                 sem[i].acquire();
@@ -103,7 +109,7 @@ public class Ladder {
                 System.out.println("East got here, released " + i);
                 //System.out.println("*************");
             }
-        } else if (!ladderDirectionIsEast) {
+        } else {
             for (int i = rungCapacity.length - 1; i >= 0; i--) {
                 sem[i].acquire();
                 System.out.println("West got here, acquired " + i);
@@ -130,12 +136,16 @@ public class Ladder {
 
             System.out.println("here in Going East, numThreadsEast == " + numThreadsEast + ", matchCountEast ==" + matchCountEast);
 
-            eastBuffer.release(4);
+            synchronized (eastBuffer){
+                eastBuffer.notifyAll();
+            }
 
             int east = numThreadsEast;
+            int counterEast = 0;
             while (east != matchCountEast) {
-
+                System.out.println(east + "===============" + matchCountEast); //is this print messing up the output?
             }
+            System.out.println(counterEast + "counter EAST");
 
         } else {
             System.out.println("Going West");
@@ -146,12 +156,16 @@ public class Ladder {
                 System.out.println("West got here, released " + i);
             }
             System.out.println("testing");
-            westBuffer.release(4);
-            int west = numThreadsWest;
-            while (west != matchCountWest) {
+            synchronized (westBuffer){
+                westBuffer.notifyAll();
 
             }
-
+            int west = numThreadsWest;
+            int counterWest = 0;
+            while (west != matchCountWest) {
+                System.out.println(west + "========" + matchCountWest);
+            }
+            System.out.println(counterWest + "counterWest");
         }
     }
 
