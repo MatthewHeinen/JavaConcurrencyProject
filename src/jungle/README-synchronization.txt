@@ -103,5 +103,19 @@ Ape W-5 starting to go West.
 Ape W-5 wants rung 3
 
 Description of what I will do for part 3:
+In this part, I will use two monitors that will from a buffer from both sides of the ladder to ensure that apes from
+both sides can't go onto the ladder at the same time. Basically to do this, I will create an east buffer and west buffer monitors
+that when are placed in the first and last position of the ladder. Additionally, we will look at the ape direction to ensure that the correct side of apes are being acquired at
+the correct time. Ones both these conditions are satisfied it means the ape wants to go on the ladder, so I will then implement a counter for each ape that does this.
+There will be the same logic for each direction. After this, once the ape acquires the first rung semaphore which we made in part 2,
+a second counter will be incremented to show the ape has gotten on the ladder. Later, this logic will be useful as we will need the
+counters to match to allow the other side of apes to go. Then the ape can decrement the rung semaphore
+The next big part of this implementation is the changeSides() function. In this function, we first acquire and release 4 times
+to ensure no ape is on the ladder. After this, we can then switch the direction of the ladder to let the other side of apes go.
+Then, if we are going east, we do one last check of the ladder and then allow the eastbound apes to go via a notifyall.
+We then have the same exact logic but for the west apes when the ladder is going west. Finally, we then check that we don't
+allow any apes from the other side to go onto the ladder until our two counters are even that we created earlier. This gives us everything to ensure
+everything goes smoothly when the apes are crossing. Finally, we have a timer that keeps calling change sides after a select amount of time
+which allows the east and west apes to take turns going on the ladder.
 
-
+Finish the rest of the explanation. Especially why it is thread safe and other stuff in the third paragraph

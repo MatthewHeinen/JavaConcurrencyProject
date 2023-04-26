@@ -17,15 +17,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Ladder {
     private final int[] rungCapacity;
-    private final Semaphore[] sem;
-    private final Object eastBuffer;
+    private final Semaphore[] sem; //semaphore that is used to lock the rungs of the ladder
+    private final Object eastBuffer; //our objects that lock the ladder on each side
     private final Object westBuffer;
 
-    private int numThreadsEast = 0;
+    private int numThreadsEast = 0; //these are counters that are used to ensure all apes have gone on the ladder
     private int numThreadsWest = 0;
     private int matchCountEast = 0;
     private int matchCountWest = 0;
-    private boolean ladderDirectionIsEast = true;
+    private boolean ladderDirectionIsEast = true; //true means ladder is east, false means its west
 
 
     public Ladder(int _nRungs) {
@@ -103,11 +103,11 @@ public class Ladder {
      * This method has the logic to check if there are any aps on the ladder, flips the ladder direction if it is safe to do so and allow the apes on both sides to go on the ladder
      * @throws InterruptedException needed for the semaphores
      */
-    private void changeSides() throws InterruptedException { // called whe synchronize on
-        if (ladderDirectionIsEast) {
+    private void changeSides() throws InterruptedException { // called when we want to have apes go onto the ladder
+        if (ladderDirectionIsEast) { //ladder is going east
             for (int i = 0; i < rungCapacity.length; i++) {
                 sem[i].acquire();
-                System.out.println("East got here, acquired " + i);
+                System.out.println("East got here, acquired " + i); //acquiring and releasing 4 times to get all apes off of the ladder
                 sem[i].release();
                 System.out.println("East got here, released " + i);
                 //System.out.println("*************");
@@ -115,23 +115,23 @@ public class Ladder {
         } else {
             for (int i = rungCapacity.length - 1; i >= 0; i--) {
                 sem[i].acquire();
-                System.out.println("West got here, acquired " + i);
+                System.out.println("West got here, acquired " + i); //acquiring and releasing 4 times to get all apes off of the ladder
                 sem[i].release();
                 System.out.println("West got here, released " + i);
             }
         }
-        ladderDirectionIsEast = !ladderDirectionIsEast;
+        ladderDirectionIsEast = !ladderDirectionIsEast; //after the checks, we can change ladder direction
 
         //if direction is goingEast and timer hits zero, set goingEast to false so that its west turn
-        if (ladderDirectionIsEast) {
-//			if(numThreadsEast ==  matchCountEast){ //ToDo:: Lock this and use .get()
+        if (ladderDirectionIsEast) { //if we're going east
+//			if(numThreadsEast ==  matchCountEast){
             System.out.println("Going East, numThreadsEast == " + numThreadsEast + ", matchCountEast ==" + matchCountEast);
             //westBuffer.acquire();
             //add logic to make sure none of the rungs have apes on them
 
             for (int i = 0; i < rungCapacity.length; i++) {
                 sem[i].acquire();
-                System.out.println("East got here, acquired " + i);
+                System.out.println("East got here, acquired " + i); //acquiring and releasing 4 times to get all apes off of the ladder
                 sem[i].release();
                 System.out.println("East got here, released " + i);
                 //System.out.println("*************");
@@ -139,14 +139,14 @@ public class Ladder {
 
             System.out.println("here in Going East, numThreadsEast == " + numThreadsEast + ", matchCountEast ==" + matchCountEast);
 
-            synchronized (eastBuffer){
+            synchronized (eastBuffer){ //allows apes on the east side to go
                 eastBuffer.notifyAll();
             }
 
             int east = numThreadsEast;
             int counterEast = 0;
             while (east != matchCountEast) {
-                System.out.println(east + "===============" + matchCountEast); //is this print messing up the output?
+                System.out.println(east + "===============" + matchCountEast); //this counter ensures that no apes go onto the ladder when apes from the west are on it
             }
             System.out.println(counterEast + " counter EAST");
 
@@ -154,24 +154,27 @@ public class Ladder {
             System.out.println("Going West");
             for (int i = rungCapacity.length - 1; i >= 0; i--) {
                 sem[i].acquire();
-                System.out.println("West got here, acquired " + i);
+                System.out.println("West got here, acquired " + i); //acquiring and releasing 4 times to get all apes off of the ladder
                 sem[i].release();
                 System.out.println("West got here, released " + i);
             }
             System.out.println("testing");
-            synchronized (westBuffer){
+            synchronized (westBuffer){ //allows apes on the west side to go
                 westBuffer.notifyAll();
 
             }
             int west = numThreadsWest;
             int counterWest = 0;
             while (west != matchCountWest) {
-                System.out.println(west + "========" + matchCountWest);
+                System.out.println(west + "========" + matchCountWest); //this counter ensures that no apes go onto the ladder when apes from the east are on it
             }
             System.out.println(counterWest + " counterWest");
         }
     }
 
+    /**
+     * This is a timing function that uses a library to continuously have a timer that calls the changesides() function which cause the east and west apes to take turns
+     */
     public void timing() {
 
         Timer timer = new Timer();
@@ -181,7 +184,7 @@ public class Ladder {
                 //System.out.println("Timer is working");
                 try {
                     //System.out.println("**************");
-                    changeSides();
+                    changeSides(); //calls our function we made above
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
