@@ -36,23 +36,11 @@ public class Ladder {
         // capacity 1 available on each rung
         for (int i = 0; i < _nRungs; i++) {
             rungCapacity[i] = 1;
-            sem[i] = new Semaphore(1);
+            sem[i] = new Semaphore(1); //creation of the rung semaphores for part 2
         }
 
 
     }
-
-    /**
-     * I believe it is working now. What I changed:
-     * made the semaphores objects so I could keep my counter logic like had it before and now use wait and notify
-     * made a new variable that tells either the eastbound apes or westbound apes to go. This corresponds with a variable in the ape class. Switched from using ladder direction to  check to the ape direction
-     * Added a while with a print statement that busy waits? So that we only allow apes to cross the bridge when the all the released apes at least have the firs ring
-     *
-     * Questions:
-     * Am i printing to many print statemnts bc of the while loop
-     * do these print statements affect the result?
-     * @return
-     */
 
     public int nRungs() {
         return rungCapacity.length;
@@ -60,46 +48,61 @@ public class Ladder {
     // return True if you succeed in grabbing the rung
 
 
+    /**
+     * Allows each ape to be able to grab rungs if it is their turn to do so
+     * @param which means which rung
+     * @param apeGoingEast the direction of the ape. Is it an east ape or an west ape
+     * @return it just returns true, but this is basically just to grab the semaphore
+     * @throws InterruptedException needed for the semaphores
+     */
     public boolean grabRung(int which, boolean apeGoingEast) throws InterruptedException {
 //		if (rungCapacity[which] < 1) {
 //			return false;
-        if ((which == 0) && apeGoingEast) { //
+        if ((which == 0) && apeGoingEast) { //if we're on rung 0 and apes are supposed to go east
             synchronized (eastBuffer) {
-                numThreadsEast++;
-                eastBuffer.wait();
+                numThreadsEast++; //increment the first east counter
+                eastBuffer.wait(); //to ensure we don't have any concurrency issues and only one side of the ladder will go
             }
         }
-        if ((which == rungCapacity.length - 1) && !apeGoingEast) {
+        if ((which == rungCapacity.length - 1) && !apeGoingEast) { //if we're on the last rung and the apes are supposed to go west
             synchronized (westBuffer) {
-                numThreadsWest++;
-                westBuffer.wait();
+                numThreadsWest++; //increment the first west counter
+                westBuffer.wait(); //to ensure we don't have any concurrency issues and only one side of the ladder will go
             }
         }
         //changeSides();
-        sem[which].acquire();
+        sem[which].acquire(); //now we can acquire the ladder semaphore once we know only one side can go
 
-        if  (which == 0 && apeGoingEast) {
+        if  (which == 0 && apeGoingEast) { //if we're on rung 0 and apes are supposed to go east
             synchronized (eastBuffer) {
-                matchCountEast++;
+                matchCountEast++; //increment the second counter as the ape should be on the first rung
             }
         }
         else {
-            if ((which == rungCapacity.length - 1) && !apeGoingEast) {
+            if ((which == rungCapacity.length - 1) && !apeGoingEast) { //same logic as the previous if statement but now going west
                 synchronized (westBuffer) {
                     matchCountWest++;
                 }
             }
         }
-        rungCapacity[which]--;
+        rungCapacity[which]--; //don't allow any other ape to grab that specific rung
         return true;
 
     }
 
+    /**
+     * The ape releases the ring is grabbed
+     * @param which the specific rung on the ladder
+     */
     public void releaseRung(int which) {
-        sem[which].release();
-        rungCapacity[which]++;
+        sem[which].release(); //release the rung semaphore
+        rungCapacity[which]++; //make it available to be grabbed
     }
 
+    /**
+     * This method has the logic to check if there are any aps on the ladder, flips the ladder direction if it is safe to do so and allow the apes on both sides to go on the ladder
+     * @throws InterruptedException needed for the semaphores
+     */
     private void changeSides() throws InterruptedException { // called whe synchronize on
         if (ladderDirectionIsEast) {
             for (int i = 0; i < rungCapacity.length; i++) {
@@ -145,7 +148,7 @@ public class Ladder {
             while (east != matchCountEast) {
                 System.out.println(east + "===============" + matchCountEast); //is this print messing up the output?
             }
-            System.out.println(counterEast + "counter EAST");
+            System.out.println(counterEast + " counter EAST");
 
         } else {
             System.out.println("Going West");
@@ -165,7 +168,7 @@ public class Ladder {
             while (west != matchCountWest) {
                 System.out.println(west + "========" + matchCountWest);
             }
-            System.out.println(counterWest + "counterWest");
+            System.out.println(counterWest + " counterWest");
         }
     }
 
