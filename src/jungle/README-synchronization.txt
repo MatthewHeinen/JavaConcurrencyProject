@@ -118,4 +118,11 @@ allow any apes from the other side to go onto the ladder until our two counters 
 everything goes smoothly when the apes are crossing. Finally, we have a timer that keeps calling change sides after a select amount of time
 which allows the east and west apes to take turns going on the ladder.
 
-Finish the rest of the explanation. Especially why it is thread safe and other stuff in the third paragraph
+As it can be seen, I do not have any busy waiting that is prevalent for the solution (I have one bit that is busy waiting a bit Dave said it's ok and no points will be deducted)
+I avoided all thread starting code as almost all of my solution is within the ladder class and nothing within the ape class besides creating a variable that Dave approved.
+This solution is efficient to the requirements of the lab as we are using a timer to allow a certain number of apes each time to cross.
+Since it is being fair and not doing one ape at a time back and forth, or just having one ape on the ladder at a time, this means our complexity is good as well
+In addition, no deadlock or livelock will be found in this solution as each side is taking turns and not going on the ladder at the same time.
+Finally, there will be no starvation as both sides each take turns on going across the ladder.
+Everything I mentioned here is with the correct implementation of semaphores for the rungs and objects for the buffers at the ends of the ladders.
+Therefore, this is why my solution is valid for this part of the lab.
