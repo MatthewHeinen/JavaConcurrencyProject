@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Ladder {
     private final int[] rungCapacity;
     private final Semaphore[] sem; //semaphore that is used to lock the rungs of the ladder
-    private final Object eastBuffer; //our objects that lock the ladder on each side
+    private final Object eastBuffer; //our objects that lock the ladder on each side.
     private final Object westBuffer;
 
     private int numThreadsEast = 0; //these are counters that are used to ensure all apes have gone on the ladder

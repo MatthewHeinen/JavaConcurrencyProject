@@ -109,7 +109,7 @@ that when are placed in the first and last position of the ladder. Additionally,
 the correct time. Ones both these conditions are satisfied it means the ape wants to go on the ladder, so I will then implement a counter for each ape that does this.
 There will be the same logic for each direction. After this, once the ape acquires the first rung semaphore which we made in part 2,
 a second counter will be incremented to show the ape has gotten on the ladder. Later, this logic will be useful as we will need the
-counters to match to allow the other side of apes to go. Then the ape can decrement the rung semaphore
+counters to match to allow the other side of apes to go. Then the ape can decrement the rung semaphore.
 The next big part of this implementation is the changeSides() function. In this function, we first acquire and release 4 times
 to ensure no ape is on the ladder. After this, we can then switch the direction of the ladder to let the other side of apes go.
 Then, if we are going east, we do one last check of the ladder and then allow the eastbound apes to go via a notifyall.
@@ -125,4 +125,4 @@ Since it is being fair and not doing one ape at a time back and forth, or just h
 In addition, no deadlock or livelock will be found in this solution as each side is taking turns and not going on the ladder at the same time.
 Finally, there will be no starvation as both sides each take turns on going across the ladder.
 Everything I mentioned here is with the correct implementation of semaphores for the rungs and objects for the buffers at the ends of the ladders.
-Therefore, this is why my solution is valid for this part of the lab.
+Therefore, this is why my solution is valid for this part of the lab and part 3 is therefore completed.

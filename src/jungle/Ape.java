@@ -9,7 +9,7 @@ import java.util.concurrent.Semaphore;
  * @author davew
  *
  * The Ape class is a kind of thread,
- *  since all Apes can go about their activities concurrently
+ *  since all Apes can go about their activities concurrently,
  * Note that each Ape has his or her own name and direction,
  *  but in this system, many Apes will share one Ladder.
  */
