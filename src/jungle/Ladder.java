@@ -95,8 +95,8 @@ public class Ladder {
      * @param which the specific rung on the ladder
      */
     public void releaseRung(int which) {
-        sem[which].release(); //release the rung semaphore
         rungCapacity[which]++; //make it available to be grabbed
+        sem[which].release(); //release the rung semaphore
     }
 
     /**
@@ -146,6 +146,7 @@ public class Ladder {
             int east = numThreadsEast;
             int counterEast = 0;
             while (east != matchCountEast) {
+                Jungle.tryToSleep(0.2, 0);
                 System.out.println(east + "===============" + matchCountEast); //this counter ensures that no apes go onto the ladder when apes from the west are on it
             }
             System.out.println(counterEast + " counter EAST");
@@ -166,6 +167,7 @@ public class Ladder {
             int west = numThreadsWest;
             int counterWest = 0;
             while (west != matchCountWest) {
+                Jungle.tryToSleep(0.1, 0);
                 System.out.println(west + "========" + matchCountWest); //this counter ensures that no apes go onto the ladder when apes from the east are on it
             }
             System.out.println(counterWest + " counterWest");

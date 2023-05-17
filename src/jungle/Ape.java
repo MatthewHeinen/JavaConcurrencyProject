@@ -15,8 +15,8 @@ import java.util.concurrent.Semaphore;
  */
 public class Ape extends Thread {
 	static private final boolean debug=true;  // "static" is shared by all Apes
-	static private final double rungDelayMin=0.8;
-	static private final double rungDelayVar=1.0;
+	static private final double rungDelayMin=0.1;
+	static private final double rungDelayVar=0;
 	private final String _name;
 	private final Ladder _ladderToCross;
 	private final boolean _goingEast; // if false, going west
